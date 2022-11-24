@@ -1,4 +1,4 @@
-const { removeChallengers, getChallengers, getUser, processResult } = require('../helper.js');
+const { removeChallengers, getUser, processResult } = require('../helper.js');
 const { ActionRowBuilder, ButtonBuilder, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
@@ -6,7 +6,7 @@ module.exports = {
 		.setName('results')
 		.setDescription('Finishes a bet and decides the winner!'),
 	async execute(interaction) {
-		let usersReal = await getChallengers(interaction.user.id);
+		let usersReal = await removeChallengers(interaction.user.id);
 		if(usersReal.code == 0){
 			//users in activeMap remove them now and prepare for decision
 			//with both challengers, set up buttons
@@ -63,7 +63,6 @@ module.exports = {
 								//start processing
 								//winner gets coins, both get 1 karma for being honest
 								//amount win loss karma
-								await removeChallengers(user1.id);
 								await processResult(winner, usersReal.bet, 1, 0, 1);
 								await processResult(loser, -usersReal.bet, 0, 1, 1);
 								const betEmbed = new EmbedBuilder()
@@ -122,7 +121,6 @@ module.exports = {
 											await truthUser.save();
 										}
 										
-										await removeChallengers(user1.id);
 										await processResult(winner, usersReal.bet, 1, 0, 0);
 										await processResult(loser, -usersReal.bet, 0, 1, 0);
 
@@ -134,7 +132,6 @@ module.exports = {
 									});
 									accCollector.once('end',async collected => {
 										if(collected.size == 0){
-											await removeChallengers(user1.id);
 											await interaction.editReply({content:'Admin didn\'t respond in time, the bet is VOIDED',components:[]}).catch(e => console.log('no interaction exists'));
 											return;
 										}
@@ -144,7 +141,6 @@ module.exports = {
 						});
 						user2Collector.once('end',async collected => {
 							if(collected.size == 0){
-								await removeChallengers(user1.id);
 								await interaction.editReply(`User didn't respond in time, the bet is VOIDED!`);
 								oppMsg.delete();
 							}
@@ -153,7 +149,6 @@ module.exports = {
 				});
 				user1Collector.once('end',async collected => {
 					if(collected.size == 0){
-						await removeChallengers(user1.id);
 						await interaction.editReply(`User didn't respond in time, the bet is VOIDED!`);
 						challMsg.delete();
 					}
